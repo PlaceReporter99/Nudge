@@ -114,7 +114,11 @@ public class Nudge {
         var yRot = player.getYRot() * Math.PI / 180; // XZ // THETA
         var xRot = player.getXRot() * Math.PI / 180; // Y  // PHI
         var pos = player.getPosition(1);
-        var delta = thingy.xRot((float) -xRot).yRot((float) -yRot).scale(Config.DISTANCE.getAsDouble());
+        var delta = thingy.xRot((float) -xRot);
+        if (Config.IGNORE_Y.isFalse()) {
+            delta = delta.yRot((float) -yRot);
+        }
+        delta = delta.scale(Config.DISTANCE.getAsDouble());
         var newPos = pos.add(delta);
         player.setPos(newPos);
     }

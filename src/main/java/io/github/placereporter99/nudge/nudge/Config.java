@@ -20,8 +20,12 @@ import java.util.stream.Collectors;
 public class Config {
     private static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
     public static final ModConfigSpec.DoubleValue DISTANCE = BUILDER
-            .translation("nudge.distance")
+            .translation("nudge.config.distance")
             .comment("How many blocks forward you will move with each press of the key.")
             .defineInRange("nudgeDistance", 1, (double) 0, 100);
+    public static final ModConfigSpec.BooleanValue IGNORE_Y = BUILDER
+            .translation("nudge.config.ignorey")
+            .comment("Whether to ignore the up/down angle of your head or not.")
+            .define("nudgeIgnoreUpDown", false);
     static final ModConfigSpec SPEC = BUILDER.build();
 }

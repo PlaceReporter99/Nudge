@@ -1,0 +1,9 @@
+{
+  "nudge.keymap.forward": "Nudge Forwards",
+  "nudge.keymap.backward": "Nudge Backwards",
+  "nudge.keymap.left": "Nudge Left",
+  "nudge.keymap.right": "Nudge Right",
+  "nudge.keymap.up": "Nudge Up",
+  "nudge.keymap.down": "Nudge Down",
+  "nudge.distance": "Nudge Distance"
+}

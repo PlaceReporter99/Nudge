@@ -25,7 +25,11 @@ public class Config {
             .defineInRange("nudgeDistance", 1, (double) 0, 100);
     public static final ModConfigSpec.BooleanValue IGNORE_Y = BUILDER
             .translation("nudge.config.ignorey")
-            .comment("Whether to ignore the up/down angle of your head or not.")
+            .comment("Whether to ignore the up/down angle of your head or not. If this is activated along with the other toggle setting, this constrains the keys to the rigid XYZ axis.")
             .define("nudgeIgnoreUpDown", false);
+    public static final ModConfigSpec.BooleanValue IGNORE_XZ = BUILDER
+            .translation("nudge.config.ignorexz")
+            .comment("Whether to ignore the left/right angle of your head or not. If this is activated along with the other toggle setting, this constrains the keys to the rigid XYZ axis.")
+            .define("nudgeIgnoreLeftRight", false);
     static final ModConfigSpec SPEC = BUILDER.build();
 }

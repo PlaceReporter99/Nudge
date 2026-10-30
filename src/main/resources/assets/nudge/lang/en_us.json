@@ -8,5 +8,5 @@
   "nudge.config.distance": "Nudge Distance",
   "nudge.config.ignorey": "Ignore Up/Down Angle",
   "nudge.config.ignorexz": "Ignore Left/Right Angle",
-  "nudge.config.nofall": "Negate Fall Damage"
+  "nudge.config.nofall": "Air Jump While Nudging"
 }

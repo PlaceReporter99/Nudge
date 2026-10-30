@@ -5,6 +5,7 @@
   "nudge.keymap.right": "Nudge Right",
   "nudge.keymap.up": "Nudge Up",
   "nudge.keymap.down": "Nudge Down",
+  "nudge.keymap.freeze": "Freeze Mid-Air",
   "nudge.config.distance": "Nudge Distance",
   "nudge.config.ignorey": "Ignore Up/Down Angle",
   "nudge.config.ignorexz": "Ignore Left/Right Angle",

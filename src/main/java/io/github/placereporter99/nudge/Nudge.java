@@ -1,33 +1,16 @@
-package io.github.placereporter99.nudge.nudge;
+package io.github.placereporter99.nudge;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.logging.LogUtils;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
-import net.minecraft.world.entity.MoverType;
-import net.minecraft.world.food.FoodProperties;
-import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.CreativeModeTabs;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.BlockBehaviour;
-import net.minecraft.world.level.material.MapColor;
-import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
-import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
-import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
@@ -36,12 +19,6 @@ import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.client.settings.KeyConflictContext;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.common.util.Lazy;
-import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
-import net.neoforged.neoforge.event.server.ServerStartingEvent;
-import net.neoforged.neoforge.registries.DeferredBlock;
-import net.neoforged.neoforge.registries.DeferredHolder;
-import net.neoforged.neoforge.registries.DeferredItem;
-import net.neoforged.neoforge.registries.DeferredRegister;
 import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 
@@ -78,7 +55,7 @@ public class Nudge {
             KeyMapping.CATEGORY_MOVEMENT
     ));
     private static final Lazy<KeyMapping> NUDGE_UP = Lazy.of(() -> new KeyMapping(
-            "nudge.keymapup",
+            "nudge.keymap.up",
             KeyConflictContext.IN_GAME,
             InputConstants.Type.KEYSYM,
             GLFW.GLFW_KEY_LEFT_BRACKET,
@@ -91,6 +68,14 @@ public class Nudge {
             GLFW.GLFW_KEY_RIGHT_BRACKET,
             KeyMapping.CATEGORY_MOVEMENT
     ));
+    private static final Lazy<KeyMapping> FREEZE = Lazy.of(() -> new KeyMapping(
+            "nudge.keymap.freeze",
+            KeyConflictContext.IN_GAME,
+            InputConstants.Type.KEYSYM,
+            GLFW.GLFW_KEY_APOSTROPHE,
+            KeyMapping.CATEGORY_MOVEMENT
+    ));
+    private static Vec3 freezePosition = null;
     public Nudge(IEventBus modEventBus, ModContainer modContainer) {
         modEventBus.addListener(this::commonSetup);
         modEventBus.addListener(this::bindings);
@@ -113,7 +98,12 @@ public class Nudge {
         var player = Minecraft.getInstance().player;
         var yRot = player.getYRot() * Math.PI / 180; // XZ // THETA
         var xRot = player.getXRot() * Math.PI / 180; // Y  // PHI
-        var pos = player.getPosition(1);
+        Vec3 pos;
+        if (freezePosition == null) {
+            pos = player.getPosition(1);
+        } else {
+            pos = freezePosition;
+        }
         var delta = thingy;
         if (Config.IGNORE_Y.isFalse()) {
             delta = delta.xRot((float) -xRot);
@@ -123,10 +113,15 @@ public class Nudge {
         }
         delta = delta.scale(Config.DISTANCE.getAsDouble());
         var newPos = pos.add(delta);
-        player.setPos(newPos);
+        if (freezePosition == null) {
+            player.setPos(newPos);
+        } else {
+            freezePosition = newPos;
+        }
     }
     @SubscribeEvent
     public void onClientTick(ClientTickEvent.Post event) {
+        var player = Minecraft.getInstance().player;
         while (NUDGE_FORWARD.get().consumeClick()) {
             doDelta(new Vec3(0, 0, 1));
         }
@@ -145,8 +140,17 @@ public class Nudge {
         while (NUDGE_DOWN.get().consumeClick()) {
             doDelta(new Vec3(0, -1, 0));
         }
+        while (FREEZE.get().consumeClick()) {
+            if (freezePosition == null) {
+                freezePosition = player.getPosition(1);
+            } else {
+                freezePosition = null;
+            }
+        }
+        if (freezePosition != null) {
+            player.setPos(freezePosition);
+        }
         if (Config.NEGATE_FALL.isTrue()) {
-            var player = Minecraft.getInstance().player;
             if (player != null) {
                 player.setOnGround(true);
             }

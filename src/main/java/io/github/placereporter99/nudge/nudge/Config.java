@@ -31,5 +31,9 @@ public class Config {
             .translation("nudge.config.ignorexz")
             .comment("Whether to ignore the left/right angle of your head or not. If this is activated along with the other toggle setting, this constrains the keys to the rigid XYZ axis.")
             .define("nudgeIgnoreLeftRight", false);
+    public static final ModConfigSpec.BooleanValue NEGATE_FALL = BUILDER
+            .translation("nudge.config.nofall")
+            .comment("Whether to try and negate fall damage by constantly setting onGround to true. May burn hunger points.")
+            .define("nudgeNegateFall", true);
     static final ModConfigSpec SPEC = BUILDER.build();
 }

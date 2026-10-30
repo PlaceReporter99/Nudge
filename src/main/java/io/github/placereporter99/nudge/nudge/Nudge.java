@@ -124,6 +124,9 @@ public class Nudge {
         delta = delta.scale(Config.DISTANCE.getAsDouble());
         var newPos = pos.add(delta);
         player.setPos(newPos);
+        if (Config.NEGATE_FALL.isTrue()) {
+            player.setOnGround(true);
+        }
     }
     @SubscribeEvent
     public void onClientTick(ClientTickEvent.Post event) {

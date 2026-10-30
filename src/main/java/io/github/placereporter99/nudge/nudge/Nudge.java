@@ -146,7 +146,10 @@ public class Nudge {
             doDelta(new Vec3(0, -1, 0));
         }
         if (Config.NEGATE_FALL.isTrue()) {
-            Minecraft.getInstance().player.setOnGround(true);
+            var player = Minecraft.getInstance().player;
+            if (player != null) {
+                Minecraft.getInstance().player.setOnGround(true);
+            }
         }
     }
 }

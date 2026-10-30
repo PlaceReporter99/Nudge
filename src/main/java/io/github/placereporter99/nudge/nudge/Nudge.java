@@ -148,7 +148,7 @@ public class Nudge {
         if (Config.NEGATE_FALL.isTrue()) {
             var player = Minecraft.getInstance().player;
             if (player != null) {
-                Minecraft.getInstance().player.setOnGround(true);
+                player.setOnGround(true);
             }
         }
     }

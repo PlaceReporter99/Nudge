@@ -33,7 +33,7 @@ public class Config {
             .define("nudgeIgnoreLeftRight", false);
     public static final ModConfigSpec.BooleanValue NEGATE_FALL = BUILDER
             .translation("nudge.config.nofall")
-            .comment("Whether to allow air jumping while using Nudge. May burn hunger points.")
+            .comment("Whether to allow air jumping and also cancel fall damage while using Nudge. May burn hunger points.")
             .define("nudgeNegateFall", true);
     static final ModConfigSpec SPEC = BUILDER.build();
 }

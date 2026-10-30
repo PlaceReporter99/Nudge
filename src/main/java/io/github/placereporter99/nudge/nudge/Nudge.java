@@ -124,9 +124,6 @@ public class Nudge {
         delta = delta.scale(Config.DISTANCE.getAsDouble());
         var newPos = pos.add(delta);
         player.setPos(newPos);
-        if (Config.NEGATE_FALL.isTrue()) {
-            player.setOnGround(true);
-        }
     }
     @SubscribeEvent
     public void onClientTick(ClientTickEvent.Post event) {
@@ -147,6 +144,9 @@ public class Nudge {
         }
         while (NUDGE_DOWN.get().consumeClick()) {
             doDelta(new Vec3(0, -1, 0));
+        }
+        if (Config.NEGATE_FALL.isTrue()) {
+            Minecraft.getInstance().player.setOnGround(true);
         }
     }
 }

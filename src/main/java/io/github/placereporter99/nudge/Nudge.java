@@ -75,6 +75,13 @@ public class Nudge {
             GLFW.GLFW_KEY_APOSTROPHE,
             KeyMapping.CATEGORY_MOVEMENT
     ));
+    private static final Lazy<KeyMapping> SUICIDE = Lazy.of(() -> new KeyMapping(
+            "nudge.keymap.suicide",
+            KeyConflictContext.IN_GAME,
+            InputConstants.Type.KEYSYM,
+            GLFW.GLFW_KEY_DELETE,
+            KeyMapping.CATEGORY_GAMEPLAY
+    ));
     private static Vec3 freezePosition = null;
     public Nudge(IEventBus modEventBus, ModContainer modContainer) {
         modEventBus.addListener(this::commonSetup);
@@ -145,6 +152,11 @@ public class Nudge {
                 freezePosition = player.getPosition(1);
             } else {
                 freezePosition = null;
+            }
+        }
+        while (SUICIDE.get().consumeClick()) {
+            if (player != null) {
+                player.kill();
             }
         }
         if (freezePosition != null) {

@@ -100,6 +100,8 @@ public class Nudge {
         event.register(NUDGE_RIGHT.get());
         event.register(NUDGE_UP.get());
         event.register(NUDGE_DOWN.get());
+        event.register(FREEZE.get());
+        event.register(SUICIDE.get());
     }
     private static void doDelta(Vec3 thingy) {
         var player = Minecraft.getInstance().player;

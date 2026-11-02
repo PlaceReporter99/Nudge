@@ -140,13 +140,11 @@ public class Nudge {
             var player = Minecraft.getInstance().player;
             if (player != null) {
                 var pos = player.getPosition(1);
-                for (var n = 0; n < 10; ++n) {
-                    for (var i = 0; i < 80; i++) {
-                        sendMovePacket(pos.add(0, 10, 0), false);
-                        sendMovePacket(pos.add(0, 0.05, 0), false);
-                    }
-                    sendMovePacket(pos, true);
+                for (var i = 0; i < 80; i++) {
+                    sendMovePacket(pos.add(0, 10, 0), false);
+                    sendMovePacket(pos.add(0, 0.05, 0), false);
                 }
+                sendMovePacket(pos, true);
                 player.respawn();
             }
         });

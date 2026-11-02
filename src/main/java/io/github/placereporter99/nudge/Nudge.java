@@ -4,6 +4,10 @@ import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.logging.LogUtils;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
+import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
+import net.minecraft.network.protocol.game.ServerboundSwingPacket;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
@@ -21,6 +25,10 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.common.util.Lazy;
 import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 @Mod(value = Nudge.MODID, dist = Dist.CLIENT)
 public class Nudge {
@@ -82,6 +90,17 @@ public class Nudge {
             GLFW.GLFW_KEY_DELETE,
             KeyMapping.CATEGORY_GAMEPLAY
     ));
+    private static final List<Map.Entry<Lazy<KeyMapping>, Runnable>> keybinds = new ArrayList<>();
+    private static void addKeybind(Lazy<KeyMapping> key, Runnable function) {
+        keybinds.add(Map.entry(key, function));
+    }
+    private static void runKeybinds() {
+        for (Map.Entry<Lazy<KeyMapping>, Runnable> entry : keybinds) {
+            if (entry.getKey().get().consumeClick()) {
+                entry.getValue().run();
+            }
+        }
+    }
     private static Vec3 freezePosition = null;
     public Nudge(IEventBus modEventBus, ModContainer modContainer) {
         modEventBus.addListener(this::commonSetup);
@@ -103,8 +122,46 @@ public class Nudge {
         event.register(FREEZE.get());
         event.register(SUICIDE.get());
     }
+    static {
+        addKeybind(NUDGE_FORWARD, () -> doDelta(new Vec3(0, 0, 1)));
+        addKeybind(NUDGE_BACKWARD, () -> doDelta(new Vec3(0, 0, -1)));
+        addKeybind(NUDGE_LEFT, () -> doDelta(new Vec3(1, 0, 0)));
+        addKeybind(NUDGE_RIGHT, () -> doDelta(new Vec3(-1, 0, 0)));
+        addKeybind(NUDGE_UP, () -> doDelta(new Vec3(0, 1, 0)));
+        addKeybind(NUDGE_DOWN, () -> doDelta(new Vec3(0, -1, 0)));
+        addKeybind(FREEZE, () -> {
+            if (freezePosition == null) {
+                freezePosition = Minecraft.getInstance().player.getPosition(1);
+            } else {
+                freezePosition = null;
+            }
+        });
+        addKeybind(SUICIDE, () -> {
+            var player = Minecraft.getInstance().player;
+            if (player != null) {
+                var pos = player.getPosition(1);
+                for (var n = 0; n < 10; ++n) {
+                    for (var i = 0; i < 80; i++) {
+                        sendMovePacket(pos.add(0, 10, 0), false);
+                        sendMovePacket(pos.add(0, 0.05, 0), false);
+                    }
+                    sendMovePacket(pos, true);
+                }
+                player.respawn();
+            }
+        });
+    }
+    private static void sendMovePacket(double x, double y, double z, boolean onGround) {
+        Minecraft.getInstance().getConnection().send(new ServerboundMovePlayerPacket.Pos(x, y, z, onGround));
+    }
+    private static void sendMovePacket(Vec3 pos, boolean onGround) {
+        sendMovePacket(pos.x, pos.y, pos.z, onGround);
+    }
     private static void doDelta(Vec3 thingy) {
         var player = Minecraft.getInstance().player;
+        if (player == null) {
+            return;
+        }
         var yRot = player.getYRot() * Math.PI / 180; // XZ // THETA
         var xRot = player.getXRot() * Math.PI / 180; // Y  // PHI
         Vec3 pos;
@@ -131,37 +188,10 @@ public class Nudge {
     @SubscribeEvent
     public void onClientTick(ClientTickEvent.Post event) {
         var player = Minecraft.getInstance().player;
-        while (NUDGE_FORWARD.get().consumeClick()) {
-            doDelta(new Vec3(0, 0, 1));
+        if (player != null) {
+            runKeybinds();
         }
-        while (NUDGE_BACKWARD.get().consumeClick()) {
-            doDelta(new Vec3(0, 0, -1));
-        }
-        while (NUDGE_LEFT.get().consumeClick()) {
-            doDelta(new Vec3(1, 0, 0));
-        }
-        while (NUDGE_RIGHT.get().consumeClick()) {
-            doDelta(new Vec3(-1, 0, 0));
-        }
-        while (NUDGE_UP.get().consumeClick()) {
-            doDelta(new Vec3(0, 1, 0));
-        }
-        while (NUDGE_DOWN.get().consumeClick()) {
-            doDelta(new Vec3(0, -1, 0));
-        }
-        while (FREEZE.get().consumeClick()) {
-            if (freezePosition == null) {
-                freezePosition = player.getPosition(1);
-            } else {
-                freezePosition = null;
-            }
-        }
-        while (SUICIDE.get().consumeClick()) {
-            if (player != null) {
-                player.kill();
-            }
-        }
-        if (freezePosition != null) {
+        if (freezePosition != null && player != null) {
             player.setPos(freezePosition);
         }
         if (Config.NEGATE_FALL.isTrue()) {

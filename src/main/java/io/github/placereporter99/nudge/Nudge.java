@@ -96,7 +96,7 @@ public class Nudge {
     }
     private static void runKeybinds() {
         for (Map.Entry<Lazy<KeyMapping>, Runnable> entry : keybinds) {
-            if (entry.getKey().get().consumeClick()) {
+            while (entry.getKey().get().consumeClick()) {
                 entry.getValue().run();
             }
         }
